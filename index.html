@@ -288,13 +288,17 @@ let fPlatform = "tutte";
 let fGP       = false;
 let fSearch   = "";
 
-// ── Fetch ──────────────────────────────────
-async function fetchGames() {
-  try {
-    const res  = await fetch(API_URL);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    allGames   = data.games || [];
+// ── Fetch via JSONP (evita CORS) ────────────
+function fetchGames() {
+  const cbName = "__gamesCallback";
+  const timeout = setTimeout(() => showError("Timeout: script non raggiungibile."), 10000);
+
+  window[cbName] = function(data) {
+    clearTimeout(timeout);
+    delete window[cbName];
+    document.getElementById("jsonp-script")?.remove();
+
+    allGames = data.games || [];
     if (data.updatedAt) {
       document.getElementById("upd").textContent =
         "AGG. " + new Date(data.updatedAt).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
@@ -302,7 +306,13 @@ async function fetchGames() {
     buildPills();
     updateStats();
     render();
-  } catch (err) { showError(err.message); }
+  };
+
+  const s = document.createElement("script");
+  s.id  = "jsonp-script";
+  s.src = API_URL + "?callback=" + cbName;
+  s.onerror = () => { clearTimeout(timeout); showError("Impossibile caricare lo script. Controlla l'URL."); };
+  document.head.appendChild(s);
 }
 
 // ── Stats ───────────────────────────────────
