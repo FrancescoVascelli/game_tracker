@@ -4,573 +4,425 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>🎮 La Mia Libreria</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    /* ─── TOKENS ─── */
     :root {
       --bg:       #080c14;
       --surface:  #0e1523;
+      --surface2: #121a2a;
       --border:   #1c2d4a;
       --accent:   #00e5ff;
       --green:    #00ff88;
       --amber:    #ffb300;
-      --red:      #ff4466;
+      --gp:       #107c10;  /* Xbox/Game Pass green */
+      --gp-light: #52b043;
       --muted:    #3a4a6a;
       --text:     #cde0f5;
       --text-dim: #5a7a9a;
       --font-hd:  'Orbitron', monospace;
       --font-bd:  'Rajdhani', sans-serif;
-      --radius:   6px;
-      --glow-a:   0 0 12px rgba(0,229,255,.35);
-      --glow-g:   0 0 12px rgba(0,255,136,.35);
+      --r:        7px;
     }
-
-    /* ─── RESET ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--text);
       font-family: var(--font-bd);
-      font-size: 16px;
       min-height: 100dvh;
       overflow-x: hidden;
     }
-
-    /* ─── SCANLINE OVERLAY ─── */
+    /* scanlines */
     body::before {
       content: '';
       pointer-events: none;
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,.08) 2px,
-        rgba(0,0,0,.08) 4px
-      );
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.07) 2px, rgba(0,0,0,.07) 4px);
       z-index: 9999;
     }
 
-    /* ─── HEADER ─── */
+    /* ── HEADER ── */
     header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(8,12,20,.92);
-      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(8,12,20,.94);
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 13px 18px;
+      display: flex; align-items: center; gap: 10px;
     }
-
-    .header-icon {
-      font-size: 22px;
-      animation: pulse-icon 2.5s ease-in-out infinite;
+    .h-icon { font-size: 20px; animation: glow-pulse 3s ease-in-out infinite; }
+    @keyframes glow-pulse {
+      0%,100% { filter: drop-shadow(0 0 4px var(--accent)); }
+      50%      { filter: drop-shadow(0 0 14px var(--accent)); }
     }
-    @keyframes pulse-icon {
-      0%,100% { text-shadow: 0 0 8px var(--accent); }
-      50%      { text-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent); }
-    }
-
-    .header-title {
+    .h-title {
       font-family: var(--font-hd);
-      font-size: clamp(13px, 4vw, 18px);
-      font-weight: 900;
-      letter-spacing: .08em;
+      font-size: clamp(12px, 3.8vw, 17px);
+      font-weight: 900; letter-spacing: .09em;
       color: var(--accent);
-      text-shadow: var(--glow-a);
+      text-shadow: 0 0 18px rgba(0,229,255,.4);
       flex: 1;
     }
-
-    .header-count {
+    .h-count {
       font-family: var(--font-hd);
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: .1em;
+      font-size: 11px; color: var(--text-dim); letter-spacing: .1em;
     }
 
-    /* ─── STATS BAR ─── */
+    /* ── STATS BAR ── */
     .stats-bar {
-      display: flex;
-      gap: 1px;
+      display: flex; gap: 1px;
       background: var(--border);
       border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      scrollbar-width: none;
+      overflow-x: auto; scrollbar-width: none;
     }
     .stats-bar::-webkit-scrollbar { display: none; }
-
     .stat-chip {
-      flex: 1;
-      min-width: 80px;
+      flex: 1; min-width: 72px;
       background: var(--surface);
-      padding: 12px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: background .2s;
-      position: relative;
+      padding: 11px 6px; text-align: center;
+      cursor: pointer; transition: background .15s;
+      position: relative; user-select: none;
     }
-    .stat-chip:hover, .stat-chip.active {
-      background: var(--bg);
-    }
+    .stat-chip:hover { background: var(--surface2); }
+    .stat-chip.active { background: var(--bg); }
     .stat-chip.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent);
-      box-shadow: var(--glow-a);
+      content: ''; position: absolute;
+      bottom: 0; left: 0; right: 0; height: 2px;
     }
-    .stat-chip[data-filter="completato"].active::after  { background: var(--green); box-shadow: var(--glow-g); }
-    .stat-chip[data-filter="in corso"].active::after    { background: var(--accent); box-shadow: var(--glow-a); }
-    .stat-chip[data-filter="wishlist"].active::after    { background: var(--amber); box-shadow: 0 0 12px rgba(255,179,0,.4); }
+    .stat-chip[data-f="tutti"].active::after        { background: var(--text-dim); }
+    .stat-chip[data-f="completato"].active::after   { background: var(--green);  box-shadow: 0 0 8px var(--green); }
+    .stat-chip[data-f="in corso"].active::after     { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .stat-chip[data-f="wishlist"].active::after     { background: var(--amber);  box-shadow: 0 0 8px var(--amber); }
+    .stat-num {
+      font-family: var(--font-hd); font-size: 19px; font-weight: 700; display: block;
+    }
+    .stat-chip[data-f="tutti"]       .stat-num { color: var(--text); }
+    .stat-chip[data-f="completato"]  .stat-num { color: var(--green); }
+    .stat-chip[data-f="in corso"]    .stat-num { color: var(--accent); }
+    .stat-chip[data-f="wishlist"]    .stat-num { color: var(--amber); }
+    .stat-lbl { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 1px; display: block; }
 
-    .stat-number {
-      font-family: var(--font-hd);
-      font-size: 20px;
-      font-weight: 700;
-      display: block;
-    }
-    .stat-chip[data-filter="tutti"]       .stat-number { color: var(--text); }
-    .stat-chip[data-filter="completato"]  .stat-number { color: var(--green); }
-    .stat-chip[data-filter="in corso"]    .stat-number { color: var(--accent); }
-    .stat-chip[data-filter="wishlist"]    .stat-number { color: var(--amber); }
-
-    .stat-label {
-      font-size: 10px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-top: 2px;
-      display: block;
-    }
-
-    /* ─── SEARCH ─── */
-    .search-wrap {
-      padding: 14px 16px 10px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 28px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-dim);
-      pointer-events: none;
-    }
+    /* ── SEARCH ── */
+    .search-row { padding: 13px 16px 8px; display: flex; gap: 8px; }
+    .search-wrap { position: relative; flex: 1; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; }
     #search {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-family: var(--font-bd);
-      font-size: 15px;
-      padding: 10px 12px 10px 38px;
-      outline: none;
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-family: var(--font-bd);
+      font-size: 15px; padding: 9px 12px 9px 36px; outline: none;
       transition: border-color .2s, box-shadow .2s;
     }
-    #search:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(0,229,255,.1);
-    }
+    #search:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,229,255,.1); }
     #search::placeholder { color: var(--text-dim); }
 
-    /* ─── PLATFORM PILLS ─── */
+    /* GP toggle */
+    #gp-toggle {
+      flex-shrink: 0; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 9px 13px; cursor: pointer;
+      font-family: var(--font-bd); font-size: 13px; letter-spacing: .06em;
+      color: var(--text-dim); transition: all .2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+    }
+    #gp-toggle.active {
+      border-color: var(--gp-light); color: var(--gp-light);
+      background: rgba(82,176,67,.1);
+    }
+    .gp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gp-light); }
+
+    /* ── PLATFORM PILLS ── */
     .platforms-wrap {
-      padding: 0 16px 14px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      padding: 0 16px 12px; display: flex; gap: 7px;
+      overflow-x: auto; scrollbar-width: none;
     }
     .platforms-wrap::-webkit-scrollbar { display: none; }
-
-    .platform-pill {
-      flex-shrink: 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all .2s;
-      white-space: nowrap;
+    .pill {
+      flex-shrink: 0; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 13px; font-size: 12px;
+      letter-spacing: .07em; text-transform: uppercase; color: var(--text-dim);
+      cursor: pointer; transition: all .18s; white-space: nowrap;
     }
-    .platform-pill.active, .platform-pill:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(0,229,255,.07);
+    .pill.active, .pill:hover {
+      border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,.07);
     }
 
-    /* ─── GRID ─── */
+    /* ── GRID ── */
     .grid {
-      padding: 0 16px 100px;
+      padding: 0 14px 100px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-    }
-
-    /* ─── CARD ─── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      position: relative;
-      overflow: hidden;
-      cursor: default;
-      transition: transform .2s, border-color .2s, box-shadow .2s;
-      animation: card-in .35s ease both;
-    }
-    @keyframes card-in {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: var(--muted);
-      box-shadow: 0 8px 32px rgba(0,0,0,.5);
-    }
-
-    /* colored left stripe */
-    .card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-    }
-    .card[data-status="completato"]::before { background: var(--green); box-shadow: var(--glow-g); }
-    .card[data-status="in corso"]::before   { background: var(--accent); box-shadow: var(--glow-a); }
-    .card[data-status="wishlist"]::before   { background: var(--amber); }
-    .card[data-status="altro"]::before      { background: var(--muted); }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
       gap: 10px;
-      margin-bottom: 10px;
     }
 
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 14px 12px;
+      position: relative; overflow: hidden;
+      transition: transform .18s, border-color .18s, box-shadow .18s;
+      animation: card-in .3s ease both;
+    }
+    @keyframes card-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .card:hover { transform: translateY(-2px); border-color: var(--muted); box-shadow: 0 6px 28px rgba(0,0,0,.5); }
+
+    /* status stripe */
+    .card::before {
+      content: ''; position: absolute; left:0; top:0; bottom:0; width:3px;
+    }
+    .card[data-s="completato"]::before { background: var(--green);  box-shadow: 0 0 8px var(--green); }
+    .card[data-s="in corso"]::before   { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .card[data-s="wishlist"]::before   { background: var(--amber); }
+
+    /* card top row */
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
     .card-title {
-      font-family: var(--font-hd);
-      font-size: clamp(12px, 3.5vw, 15px);
-      font-weight: 700;
-      letter-spacing: .04em;
-      color: var(--text);
-      line-height: 1.3;
+      font-family: var(--font-hd); font-size: clamp(11px, 3.2vw, 14px);
+      font-weight: 700; letter-spacing: .04em; color: var(--text); line-height: 1.35;
+    }
+    .badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+
+    .badge-status {
+      font-size: 9px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+    }
+    .badge-status.completato { background: rgba(0,255,136,.12); color: var(--green);  border: 1px solid rgba(0,255,136,.28); }
+    .badge-status.in-corso   { background: rgba(0,229,255,.12); color: var(--accent); border: 1px solid rgba(0,229,255,.28); }
+    .badge-status.wishlist   { background: rgba(255,179,0,.12); color: var(--amber);  border: 1px solid rgba(255,179,0,.28); }
+
+    .badge-gp {
+      font-size: 9px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+      background: rgba(82,176,67,.14); color: var(--gp-light); border: 1px solid rgba(82,176,67,.3);
     }
 
-    .status-badge {
-      flex-shrink: 0;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 3px;
+    /* card meta */
+    .card-meta {
+      display: flex; flex-wrap: wrap; gap: 8px 16px;
+      margin-top: 6px;
     }
-    .status-badge.completato { background: rgba(0,255,136,.12); color: var(--green); border: 1px solid rgba(0,255,136,.3); }
-    .status-badge.in-corso   { background: rgba(0,229,255,.12); color: var(--accent); border: 1px solid rgba(0,229,255,.3); }
-    .status-badge.wishlist   { background: rgba(255,179,0,.12); color: var(--amber); border: 1px solid rgba(255,179,0,.3); }
-    .status-badge.altro      { background: rgba(58,74,106,.3);  color: var(--text-dim); border: 1px solid var(--border); }
+    .meta-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; color: var(--text-dim); letter-spacing: .03em;
+    }
+    .meta-item svg { flex-shrink: 0; }
+    .meta-item span { color: var(--text); font-weight: 500; }
 
     .card-platform {
-      font-size: 13px;
-      color: var(--text-dim);
-      letter-spacing: .05em;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      font-size: 12px; color: var(--text-dim); letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .card-platform::before {
-      content: '▸';
-      color: var(--muted);
-      font-size: 10px;
-    }
+    .card-platform::before { content: '▸'; color: var(--muted); font-size: 9px; }
 
-    /* ─── EMPTY / LOADING / ERROR ─── */
-    .state-wrap {
-      padding: 80px 20px;
-      text-align: center;
-    }
-    .state-icon { font-size: 48px; display: block; margin-bottom: 16px; }
-    .state-title {
-      font-family: var(--font-hd);
-      font-size: 16px;
-      color: var(--text-dim);
-      letter-spacing: .08em;
-    }
-    .state-sub { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
-
-    /* spinner */
+    /* ── STATES ── */
+    .state-wrap { padding: 80px 20px; text-align: center; }
+    .state-icon  { font-size: 46px; display: block; margin-bottom: 14px; }
+    .state-title { font-family: var(--font-hd); font-size: 15px; color: var(--text-dim); letter-spacing: .08em; }
+    .state-sub   { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
     .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
+      width: 38px; height: 38px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 1s linear infinite; margin: 0 auto 14px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ─── FOOTER ─── */
+    /* ── FOOTER ── */
     footer {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(8,12,20,.95);
-      backdrop-filter: blur(12px);
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(8,12,20,.96); backdrop-filter: blur(14px);
       border-top: 1px solid var(--border);
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: .05em;
+      padding: 9px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--text-dim); letter-spacing: .05em;
     }
-    #last-update { color: var(--muted); }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 400px) {
+    @media (max-width: 380px) {
       .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-  <span class="header-icon">🕹️</span>
-  <span class="header-title">LA MIA LIBRERIA</span>
-  <span class="header-count" id="game-count">—</span>
+  <span class="h-icon">🕹️</span>
+  <span class="h-title">LA MIA LIBRERIA</span>
+  <span class="h-count" id="h-count">—</span>
 </header>
 
-<!-- STATS / FILTER BAR -->
 <div class="stats-bar">
-  <div class="stat-chip active" data-filter="tutti" onclick="setStatusFilter(this)">
-    <span class="stat-number" id="cnt-tutti">0</span>
-    <span class="stat-label">Tutti</span>
-  </div>
-  <div class="stat-chip" data-filter="completato" onclick="setStatusFilter(this)">
-    <span class="stat-number" id="cnt-completato">0</span>
-    <span class="stat-label">Completati</span>
-  </div>
-  <div class="stat-chip" data-filter="in corso" onclick="setStatusFilter(this)">
-    <span class="stat-number" id="cnt-in-corso">0</span>
-    <span class="stat-label">In Corso</span>
-  </div>
-  <div class="stat-chip" data-filter="wishlist" onclick="setStatusFilter(this)">
-    <span class="stat-number" id="cnt-wishlist">0</span>
-    <span class="stat-label">Wishlist</span>
-  </div>
+  <div class="stat-chip active" data-f="tutti"      onclick="setStatus(this)"><span class="stat-num" id="cn-t">0</span><span class="stat-lbl">Tutti</span></div>
+  <div class="stat-chip"        data-f="completato" onclick="setStatus(this)"><span class="stat-num" id="cn-c">0</span><span class="stat-lbl">Completati</span></div>
+  <div class="stat-chip"        data-f="in corso"   onclick="setStatus(this)"><span class="stat-num" id="cn-i">0</span><span class="stat-lbl">In Corso</span></div>
+  <div class="stat-chip"        data-f="wishlist"   onclick="setStatus(this)"><span class="stat-num" id="cn-w">0</span><span class="stat-lbl">Wishlist</span></div>
 </div>
 
-<!-- SEARCH -->
-<div class="search-wrap">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-  </svg>
-  <input id="search" type="search" placeholder="Cerca gioco..." autocomplete="off" />
+<div class="search-row">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search" type="search" placeholder="Cerca gioco…" autocomplete="off" />
+  </div>
+  <button id="gp-toggle" onclick="toggleGP()">
+    <span class="gp-dot"></span>Game Pass
+  </button>
 </div>
 
-<!-- PLATFORM PILLS -->
-<div class="platforms-wrap" id="platforms-wrap"></div>
+<div class="platforms-wrap" id="platforms"></div>
 
-<!-- MAIN GRID -->
-<main>
-  <div class="grid" id="grid">
-    <div class="state-wrap">
-      <div class="spinner"></div>
-      <p class="state-title">CARICAMENTO IN CORSO</p>
-    </div>
-  </div>
-</main>
+<main><div class="grid" id="grid">
+  <div class="state-wrap"><div class="spinner"></div><p class="state-title">CARICAMENTO…</p></div>
+</div></main>
 
-<!-- FOOTER -->
 <footer>
   <span>🎮 GAME TRACKER</span>
-  <span id="last-update"></span>
+  <span id="upd"></span>
 </footer>
 
 <script>
-  // ══════════════════════════════════════════════
-  // ⚠️  INSERISCI QUI L'URL DEL TUO APPS SCRIPT
-  // ══════════════════════════════════════════════
-  const API_URL = "https://script.google.com/macros/s/AKfycbx8AeOzMhimv-jnK7L2xoVCYcx3VDp14qpB5grGlHHorw7v-xm5odQJzHCttgV-Cr26/exec";
+// ══════════════════════════════════════════
+// ⚠️  INSERISCI L'URL DEL TUO APPS SCRIPT
+// ══════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbymGq9KshOq2s7SNp2bvwsTY3WUvfYD0S3M9TVv-Jx5aEJHQYh8ae46HbfBMC5mJQbq/exec";
 
-  // ── State ──────────────────────────────────────
-  let allGames = [];
-  let activeStatus = "tutti";
-  let activePlatform = "tutte";
-  let searchQuery = "";
+let allGames = [];
+let fStatus   = "tutti";
+let fPlatform = "tutte";
+let fGP       = false;
+let fSearch   = "";
 
-  // ── Fetch ──────────────────────────────────────
-  async function fetchGames() {
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-      allGames = data.games || [];
-      if (data.updatedAt) {
-        document.getElementById("last-update").textContent =
-          "AGG. " + new Date(data.updatedAt).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
-      }
-      buildPlatformPills();
-      updateStats();
-      render();
-    } catch (err) {
-      showError(err.message);
+// ── Fetch ──────────────────────────────────
+async function fetchGames() {
+  try {
+    const res  = await fetch(API_URL);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    allGames   = data.games || [];
+    if (data.updatedAt) {
+      document.getElementById("upd").textContent =
+        "AGG. " + new Date(data.updatedAt).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
     }
-  }
-
-  // ── Normalise status ───────────────────────────
-  function normaliseStatus(raw) {
-    if (!raw) return "altro";
-    const s = raw.toLowerCase().trim();
-    if (s.includes("complet")) return "completato";
-    if (s.includes("corso") || s.includes("progress") || s.includes("playing")) return "in corso";
-    if (s.includes("wish") || s.includes("lista") || s.includes("voglio")) return "wishlist";
-    return "altro";
-  }
-
-  // ── Resolve field names flexibly ───────────────
-  function getField(game, ...candidates) {
-    for (const c of candidates) {
-      if (game[c] !== undefined && game[c] !== "") return game[c];
-      const lower = c.toLowerCase();
-      const key = Object.keys(game).find(k => k.toLowerCase() === lower);
-      if (key && game[key] !== "") return game[key];
-    }
-    return "";
-  }
-
-  function gameTitle(g)    { return getField(g, "titolo", "title", "nome", "gioco") || "—"; }
-  function gamePlatform(g) { return getField(g, "piattaforma", "platform", "console", "sistema") || "—"; }
-  function gameStatus(g)   { return getField(g, "stato", "status", "state"); }
-
-  // ── Stats ──────────────────────────────────────
-  function updateStats() {
-    const counts = { tutti: allGames.length, completato: 0, "in corso": 0, wishlist: 0 };
-    allGames.forEach(g => {
-      const s = normaliseStatus(gameStatus(g));
-      if (counts[s] !== undefined) counts[s]++;
-    });
-    document.getElementById("cnt-tutti").textContent      = counts.tutti;
-    document.getElementById("cnt-completato").textContent = counts.completato;
-    document.getElementById("cnt-in-corso").textContent   = counts["in corso"];
-    document.getElementById("cnt-wishlist").textContent   = counts.wishlist;
-    document.getElementById("game-count").textContent     = counts.tutti + " GIOCHI";
-  }
-
-  // ── Platform pills ─────────────────────────────
-  function buildPlatformPills() {
-    const platforms = ["Tutte", ...new Set(
-      allGames.map(g => gamePlatform(g)).filter(p => p && p !== "—")
-    )];
-    const wrap = document.getElementById("platforms-wrap");
-    wrap.innerHTML = platforms.map(p => `
-      <button class="platform-pill${p === "Tutte" ? " active" : ""}"
-              onclick="setPlatform(this, '${p}')">${p}</button>
-    `).join("");
-  }
-
-  // ── Filters ────────────────────────────────────
-  function setStatusFilter(el) {
-    document.querySelectorAll(".stat-chip").forEach(c => c.classList.remove("active"));
-    el.classList.add("active");
-    activeStatus = el.dataset.filter;
+    buildPills();
+    updateStats();
     render();
-  }
+  } catch (err) { showError(err.message); }
+}
 
-  function setPlatform(el, p) {
-    document.querySelectorAll(".platform-pill").forEach(x => x.classList.remove("active"));
-    el.classList.add("active");
-    activePlatform = p.toLowerCase();
-    render();
-  }
+// ── Stats ───────────────────────────────────
+function updateStats() {
+  const c = { tutti: allGames.length, completato: 0, "in corso": 0, wishlist: 0 };
+  allGames.forEach(g => { if (c[g.stato] !== undefined) c[g.stato]++; });
+  document.getElementById("cn-t").textContent = c.tutti;
+  document.getElementById("cn-c").textContent = c.completato;
+  document.getElementById("cn-i").textContent = c["in corso"];
+  document.getElementById("cn-w").textContent = c.wishlist;
+  document.getElementById("h-count").textContent = c.tutti + " GIOCHI";
+}
 
-  document.getElementById("search").addEventListener("input", e => {
-    searchQuery = e.target.value.toLowerCase().trim();
-    render();
+// ── Platform pills ──────────────────────────
+function buildPills() {
+  const platforms = ["Tutte", ...new Set(
+    allGames.map(g => g.piattaforma).filter(p => p && p !== "—")
+  )];
+  document.getElementById("platforms").innerHTML = platforms.map(p =>
+    `<button class="pill${p==="Tutte"?" active":""}" onclick="setPlatform(this,'${esc(p)}')">${esc(p)}</button>`
+  ).join("");
+}
+
+// ── Filters ─────────────────────────────────
+function setStatus(el) {
+  document.querySelectorAll(".stat-chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active"); fStatus = el.dataset.f; render();
+}
+function setPlatform(el, p) {
+  document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
+  el.classList.add("active"); fPlatform = p.toLowerCase(); render();
+}
+function toggleGP() {
+  fGP = !fGP;
+  document.getElementById("gp-toggle").classList.toggle("active", fGP); render();
+}
+document.getElementById("search").addEventListener("input", e => {
+  fSearch = e.target.value.toLowerCase().trim(); render();
+});
+
+// ── Render ───────────────────────────────────
+function render() {
+  const grid = document.getElementById("grid");
+  const list = allGames.filter(g => {
+    if (fStatus !== "tutti" && g.stato !== fStatus) return false;
+    if (fPlatform !== "tutte" && g.piattaforma.toLowerCase() !== fPlatform) return false;
+    if (fGP && !g.gamepass) return false;
+    if (fSearch && !g.titolo.toLowerCase().includes(fSearch)) return false;
+    return true;
   });
 
-  // ── Render ─────────────────────────────────────
-  function render() {
-    const grid = document.getElementById("grid");
+  if (!list.length) {
+    grid.innerHTML = `<div class="state-wrap"><span class="state-icon">👾</span><p class="state-title">NESSUN GIOCO TROVATO</p><p class="state-sub">Prova a cambiare filtri o ricerca.</p></div>`;
+    return;
+  }
 
-    const filtered = allGames.filter(g => {
-      const st = normaliseStatus(gameStatus(g));
-      const pl = gamePlatform(g).toLowerCase();
-      const ti = gameTitle(g).toLowerCase();
+  const labels = { completato:"Completato", "in corso":"In Corso", wishlist:"Wishlist" };
 
-      if (activeStatus !== "tutti" && st !== activeStatus) return false;
-      if (activePlatform !== "tutte" && !pl.includes(activePlatform)) return false;
-      if (searchQuery && !ti.includes(searchQuery)) return false;
-      return true;
-    });
+  grid.innerHTML = list.map((g, i) => {
+    const bc = g.stato.replace(" ", "-");
+    const hasDates = g.inizio || g.fine;
+    const hasOre   = g.ore && g.ore !== "0" && g.ore !== "";
 
-    if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div class="state-wrap">
-          <span class="state-icon">👾</span>
-          <p class="state-title">NESSUN GIOCO TROVATO</p>
-          <p class="state-sub">Prova a cambiare i filtri o la ricerca.</p>
-        </div>`;
-      return;
-    }
+    const metaHtml = [
+      hasDates && g.stato === "completato" && g.fine
+        ? `<div class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Fine: <span>${esc(g.fine)}</span>
+           </div>` : "",
+      g.stato === "in corso" && g.inizio
+        ? `<div class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Iniziato: <span>${esc(g.inizio)}</span>
+           </div>` : "",
+      hasOre
+        ? `<div class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span>${esc(g.ore)}h</span>
+           </div>` : "",
+    ].filter(Boolean).join("");
 
-    grid.innerHTML = filtered.map((g, i) => {
-      const st = normaliseStatus(gameStatus(g));
-      const badgeClass = st.replace(" ", "-");
-      const labels = { completato: "Completato", "in corso": "In Corso", wishlist: "Wishlist", altro: "Altro" };
-      return `
-        <div class="card" data-status="${st}" style="animation-delay:${Math.min(i * 30, 300)}ms">
-          <div class="card-header">
-            <span class="card-title">${escHtml(gameTitle(g))}</span>
-            <span class="status-badge ${badgeClass}">${labels[st]}</span>
+    return `
+      <div class="card" data-s="${g.stato}" style="animation-delay:${Math.min(i*25,280)}ms">
+        <div class="card-top">
+          <span class="card-title">${esc(g.titolo)}</span>
+          <div class="badges">
+            <span class="badge-status ${bc}">${labels[g.stato]}</span>
+            ${g.gamepass ? '<span class="badge-gp">Game Pass</span>' : ""}
           </div>
-          <div class="card-platform">${escHtml(gamePlatform(g))}</div>
-        </div>`;
-    }).join("");
-  }
-
-  // ── Helpers ────────────────────────────────────
-  function escHtml(s) {
-    return String(s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
-
-  function showError(msg) {
-    document.getElementById("grid").innerHTML = `
-      <div class="state-wrap">
-        <span class="state-icon">⚠️</span>
-        <p class="state-title">ERRORE DI CARICAMENTO</p>
-        <p class="state-sub">${escHtml(msg)}<br><br>Verifica che l'URL dello script sia corretto<br>e che la distribuzione sia pubblica.</p>
+        </div>
+        ${g.piattaforma ? `<div class="card-platform">${esc(g.piattaforma)}</div>` : ""}
+        ${metaHtml ? `<div class="card-meta">${metaHtml}</div>` : ""}
       </div>`;
-  }
+  }).join("");
+}
 
-  // ── Init ───────────────────────────────────────
-  if (API_URL === "INCOLLA_QUI_L_URL_DELLO_SCRIPT") {
-    document.getElementById("grid").innerHTML = `
-      <div class="state-wrap">
-        <span class="state-icon">🔧</span>
-        <p class="state-title">CONFIGURA L'API URL</p>
-        <p class="state-sub">Apri <code>index.html</code>, trova la riga<br><code>const API_URL = …</code><br>e incolla l'URL del tuo Google Apps Script.</p>
-      </div>`;
-  } else {
-    fetchGames();
-  }
+// ── Helpers ──────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function showError(msg) {
+  document.getElementById("grid").innerHTML = `
+    <div class="state-wrap">
+      <span class="state-icon">⚠️</span>
+      <p class="state-title">ERRORE DI CARICAMENTO</p>
+      <p class="state-sub">${esc(msg)}<br><br>Controlla che l'URL dello script sia corretto<br>e che la distribuzione sia pubblica.</p>
+    </div>`;
+}
+
+// ── Init ─────────────────────────────────────
+if (API_URL === "INCOLLA_QUI_L_URL_DELLO_SCRIPT") {
+  document.getElementById("grid").innerHTML = `
+    <div class="state-wrap">
+      <span class="state-icon">🔧</span>
+      <p class="state-title">CONFIGURA L'API URL</p>
+      <p class="state-sub">Apri <code>index.html</code> e sostituisci<br><code>INCOLLA_QUI_L_URL_DELLO_SCRIPT</code><br>con l'URL del tuo Google Apps Script.</p>
+    </div>`;
+} else {
+  fetchGames();
+}
 </script>
 </body>
 </html>
