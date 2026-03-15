@@ -185,7 +185,7 @@
 // =============================================
 // ⚠️  INCOLLA QUI L'URL DEL TUO APPS SCRIPT
 // =============================================
-var API_URL = "https://script.google.com/macros/s/AKfycbyGXbiSkgq74eWE4oBFbrCPuUozOCtOvLEHcVR-BIqKRBGVonpEMw8DPWf13spHmy9_/exec";
+var API_URL = "INCOLLA_QUI_L_URL_DELLO_SCRIPT";
 
 var allGames = [];
 var fStatus = "tutti", fPlatform = "tutte", fGP = false, fSearch = "";
@@ -237,9 +237,10 @@ function fetchCover(titolo, imgEl) {
     applyCover(imgEl, coverCache[titolo]);
     return;
   }
-  // Steam Store search API (pubblica, no key)
-  var url = "https://store.steampowered.com/api/storesearch/?term=" +
-    encodeURIComponent(titolo) + "&l=italian&cc=it";
+  // Steam Store search tramite proxy CORS
+  var steamUrl = "https://store.steampowered.com/api/storesearch/?term=" +
+    encodeURIComponent(titolo) + "&l=english&cc=it";
+  var url = "https://corsproxy.io/?" + encodeURIComponent(steamUrl);
 
   fetch(url)
     .then(function(r) { return r.json(); })
