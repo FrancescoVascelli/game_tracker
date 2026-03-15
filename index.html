@@ -240,11 +240,12 @@ function fetchCover(titolo, imgEl) {
   // Steam Store search tramite proxy CORS
   var steamUrl = "https://store.steampowered.com/api/storesearch/?term=" +
     encodeURIComponent(titolo) + "&l=english&cc=it";
-  var url = "https://corsproxy.io/?" + encodeURIComponent(steamUrl);
+  var url = "https://api.allorigins.win/get?url=" + encodeURIComponent(steamUrl);
 
   fetch(url)
     .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function(wrapper) {
+      var data = JSON.parse(wrapper.contents || "{}");
       var items = data && data.items;
       if (items && items.length > 0) {
         // Prendi il primo risultato — di solito è il più rilevante
