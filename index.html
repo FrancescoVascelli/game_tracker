@@ -4,15 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>🎮 La Mia Libreria</title>
-
-  <!-- PWA: apre a schermo intero come un'app nativa -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Giochi" />
   <meta name="theme-color" content="#080c14" />
   <link rel="manifest" href="manifest.json" />
-
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -26,6 +23,7 @@
     body::before { content:''; pointer-events:none; position:fixed; inset:0;
       background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px); z-index:9999; }
 
+    /* ── HEADER ── */
     header { position:sticky; top:0; z-index:100; background:rgba(8,12,20,.94); backdrop-filter:blur(14px);
       border-bottom:1px solid var(--border); padding:13px 18px; display:flex; align-items:center; gap:10px; }
     .h-icon { font-size:20px; animation:glow-pulse 3s ease-in-out infinite; }
@@ -34,6 +32,7 @@
       letter-spacing:.09em; color:var(--accent); text-shadow:0 0 18px rgba(0,229,255,.4); flex:1; }
     .h-count { font-family:var(--font-hd); font-size:11px; color:var(--text-dim); letter-spacing:.1em; }
 
+    /* ── STATS BAR ── */
     .stats-bar { display:flex; gap:1px; background:var(--border); border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
     .stats-bar::-webkit-scrollbar { display:none; }
     .stat-chip { flex:1; min-width:72px; background:var(--surface); padding:11px 6px; text-align:center;
@@ -52,6 +51,7 @@
     .stat-chip[data-f="wishlist"]   .stat-num { color:var(--amber); }
     .stat-lbl { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-top:1px; display:block; }
 
+    /* ── SEARCH ROW ── */
     .search-row { padding:13px 16px 8px; display:flex; gap:8px; }
     .search-wrap { position:relative; flex:1; }
     .search-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text-dim); pointer-events:none; }
@@ -66,6 +66,7 @@
     #gp-toggle.active { border-color:var(--gp-light); color:var(--gp-light); background:rgba(82,176,67,.1); }
     .gp-dot { width:8px; height:8px; border-radius:50%; background:var(--gp-light); }
 
+    /* ── PLATFORM PILLS ── */
     .platforms-wrap { padding:0 16px 12px; display:flex; gap:7px; overflow-x:auto; scrollbar-width:none; }
     .platforms-wrap::-webkit-scrollbar { display:none; }
     .pill { flex-shrink:0; background:var(--surface); border:1px solid var(--border); border-radius:20px;
@@ -73,34 +74,59 @@
       cursor:pointer; transition:all .18s; white-space:nowrap; }
     .pill.active, .pill:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,229,255,.07); }
 
-    .grid { padding:0 14px 100px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:10px; }
+    /* ── GRID ── */
+    .grid { padding:0 14px 100px; display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
 
+    /* ── CARD ── */
     .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
-      padding:14px 14px 12px; position:relative; overflow:hidden;
+      position:relative; overflow:hidden;
       transition:transform .18s,border-color .18s,box-shadow .18s; animation:card-in .3s ease both; }
     @keyframes card-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
     .card:hover { transform:translateY(-2px); border-color:var(--muted); box-shadow:0 6px 28px rgba(0,0,0,.5); }
-    .card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+
+    /* striscia colorata in cima */
+    .card::before { content:''; position:absolute; left:0; top:0; right:0; height:3px; z-index:2; }
     .card[data-s="completato"]::before { background:var(--green);  box-shadow:0 0 8px var(--green); }
     .card[data-s="in corso"]::before   { background:var(--accent); box-shadow:0 0 8px var(--accent); }
     .card[data-s="wishlist"]::before   { background:var(--amber); }
-    .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px; }
-    .card-title { font-family:var(--font-hd); font-size:clamp(11px,3.2vw,14px); font-weight:700;
+
+    /* copertina */
+    .card-cover {
+      width:100%; aspect-ratio:460/215;
+      background:var(--surface2);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden; position:relative;
+    }
+    .card-cover img {
+      width:100%; height:100%; object-fit:cover;
+      display:block; opacity:0; transition:opacity .4s;
+    }
+    .card-cover img.loaded { opacity:1; }
+    .cover-placeholder {
+      font-size:28px; opacity:.3;
+    }
+
+    /* corpo */
+    .card-body { padding:9px 11px 10px; }
+    .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:6px; margin-bottom:5px; }
+    .card-title { font-family:var(--font-hd); font-size:clamp(9px,2.5vw,11px); font-weight:700;
       letter-spacing:.04em; color:var(--text); line-height:1.35; }
-    .badges { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
-    .badge-status { font-size:9px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:2px 7px; border-radius:3px; }
+    .badges { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+    .badge-status { font-size:7px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; padding:2px 5px; border-radius:3px; }
     .badge-status.completato { background:rgba(0,255,136,.12); color:var(--green);  border:1px solid rgba(0,255,136,.28); }
     .badge-status.in-corso   { background:rgba(0,229,255,.12); color:var(--accent); border:1px solid rgba(0,229,255,.28); }
     .badge-status.wishlist   { background:rgba(255,179,0,.12); color:var(--amber);  border:1px solid rgba(255,179,0,.28); }
-    .badge-gp { font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:3px;
+    .badge-gp { font-size:7px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; padding:2px 5px; border-radius:3px;
       background:rgba(82,176,67,.14); color:var(--gp-light); border:1px solid rgba(82,176,67,.3); }
-    .card-platform { font-size:12px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase;
-      margin-bottom:6px; display:flex; align-items:center; gap:5px; }
-    .card-platform::before { content:'▸'; color:var(--muted); font-size:9px; }
-    .card-meta { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:6px; }
-    .meta-item { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--text-dim); }
+    .card-platform { font-size:10px; color:var(--text-dim); letter-spacing:.05em; text-transform:uppercase;
+      margin-bottom:4px; display:flex; align-items:center; gap:4px; }
+    .card-platform::before { content:'▸'; color:var(--muted); font-size:8px; }
+    .card-meta { display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:4px; }
+    .meta-item { display:flex; align-items:center; gap:3px; font-size:10px; color:var(--text-dim); }
     .meta-item span { color:var(--text); font-weight:500; }
 
+    /* ── STATES ── */
     .state-wrap { padding:80px 20px; text-align:center; }
     .state-icon { font-size:46px; display:block; margin-bottom:14px; }
     .state-title { font-family:var(--font-hd); font-size:15px; color:var(--text-dim); letter-spacing:.08em; }
@@ -109,11 +135,12 @@
       border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 14px; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
+    /* ── FOOTER ── */
     footer { position:fixed; bottom:0; left:0; right:0; background:rgba(8,12,20,.96); backdrop-filter:blur(14px);
       border-top:1px solid var(--border); padding:9px 18px; display:flex; justify-content:space-between;
       align-items:center; font-size:11px; color:var(--text-dim); letter-spacing:.05em; }
 
-    @media(max-width:380px) { .grid { grid-template-columns:1fr; } }
+    @media(max-width:340px) { .grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -158,12 +185,15 @@
 // =============================================
 // ⚠️  INCOLLA QUI L'URL DEL TUO APPS SCRIPT
 // =============================================
-var API_URL = "https://script.google.com/macros/s/AKfycbyGXbiSkgq74eWE4oBFbrCPuUozOCtOvLEHcVR-BIqKRBGVonpEMw8DPWf13spHmy9_/exec";
+var API_URL = "INCOLLA_QUI_L_URL_DELLO_SCRIPT";
 
 var allGames = [];
 var fStatus = "tutti", fPlatform = "tutte", fGP = false, fSearch = "";
 
-// Carica i dati: prima prova fetch, poi fallback JSONP
+// Cache copertine: titolo → URL immagine (o null se non trovata)
+var coverCache = {};
+
+// ── Carica dati ─────────────────────────────
 function loadData() {
   fetch(API_URL)
     .then(function(res) {
@@ -172,23 +202,18 @@ function loadData() {
     })
     .then(onData)
     .catch(function() {
-      // CORS bloccato: usa JSONP
       var done = false;
       var timer = setTimeout(function() {
         if (!done) showError("Timeout. Ricarica la pagina.");
       }, 10000);
-
       window.__gt_cb = function(data) {
-        done = true;
-        clearTimeout(timer);
-        onData(data);
+        done = true; clearTimeout(timer); onData(data);
       };
-
       var s = document.createElement("script");
       s.src = API_URL + "?callback=__gt_cb";
       s.onerror = function() {
         clearTimeout(timer);
-        showError("Impossibile caricare i dati.\nURL corretto? Distribuzione pubblica?");
+        showError("Impossibile caricare i dati. URL corretto? Distribuzione pubblica?");
       };
       document.head.appendChild(s);
     });
@@ -205,6 +230,50 @@ function onData(data) {
   render();
 }
 
+// ── Copertine Steam ──────────────────────────
+// Cerca il gioco su Steam per nome → restituisce URL copertina
+function fetchCover(titolo, imgEl) {
+  if (coverCache[titolo] !== undefined) {
+    applyCover(imgEl, coverCache[titolo]);
+    return;
+  }
+  // Steam Store search API (pubblica, no key)
+  var url = "https://store.steampowered.com/api/storesearch/?term=" +
+    encodeURIComponent(titolo) + "&l=italian&cc=it";
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var items = data && data.items;
+      if (items && items.length > 0) {
+        // Prendi il primo risultato — di solito è il più rilevante
+        var appid = items[0].id;
+        // Copertina header Steam: 460×215
+        var coverUrl = "https://cdn.akamai.steamstatic.com/steam/apps/" + appid + "/header.jpg";
+        coverCache[titolo] = coverUrl;
+        applyCover(imgEl, coverUrl);
+      } else {
+        coverCache[titolo] = null;
+        imgEl.parentElement.querySelector(".cover-placeholder").style.display = "block";
+      }
+    })
+    .catch(function() {
+      coverCache[titolo] = null;
+    });
+}
+
+function applyCover(imgEl, url) {
+  if (!url) return;
+  imgEl.src = url;
+  imgEl.onload  = function() { imgEl.classList.add("loaded"); };
+  imgEl.onerror = function() {
+    imgEl.style.display = "none";
+    var ph = imgEl.parentElement.querySelector(".cover-placeholder");
+    if (ph) ph.style.display = "block";
+  };
+}
+
+// ── Stats ────────────────────────────────────
 function updateStats() {
   var c = {tutti: allGames.length, completato: 0, "in corso": 0, wishlist: 0};
   allGames.forEach(function(g) {
@@ -218,6 +287,7 @@ function updateStats() {
   document.getElementById("h-count").textContent = c["tutti"] + " GIOCHI";
 }
 
+// ── Platform pills ───────────────────────────
 function buildPills() {
   var seen = {}, platforms = ["Tutte"];
   allGames.forEach(function(g) {
@@ -230,6 +300,7 @@ function buildPills() {
   }).join("");
 }
 
+// ── Filtri ───────────────────────────────────
 function setStatus(el) {
   document.querySelectorAll(".stat-chip").forEach(function(c) { c.classList.remove("active"); });
   el.classList.add("active");
@@ -252,11 +323,12 @@ document.getElementById("search").addEventListener("input", function(e) {
   render();
 });
 
+// ── Render ───────────────────────────────────
 function render() {
   var grid = document.getElementById("grid");
   var list = allGames.filter(function(g) {
-    var stato = g.stato || "";
-    var piatt = (g.piattaforma || "").toLowerCase();
+    var stato  = g.stato || "";
+    var piatt  = (g.piattaforma || "").toLowerCase();
     var titolo = (g.titolo || "").toLowerCase();
     if (fStatus !== "tutti" && stato !== fStatus) return false;
     if (fPlatform !== "tutte" && piatt !== fPlatform) return false;
@@ -273,51 +345,64 @@ function render() {
   }
 
   var labels = {completato:"Completato", "in corso":"In Corso", wishlist:"Wishlist"};
-  var calSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
-  var clkSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  var calSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var clkSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
 
   grid.innerHTML = list.map(function(g, i) {
-    var stato = g.stato || "wishlist";
-    var bc = stato.replace(" ", "-");
-    var label = labels[stato] || stato;
+    var stato  = g.stato || "wishlist";
+    var bc     = stato.replace(" ", "-");
+    var label  = labels[stato] || stato;
     var titolo = g.titolo || "—";
-    var piatt = g.piattaforma || "";
-    var meta = [];
+    var piatt  = g.piattaforma || "";
+    var meta   = [];
     if (stato === "completato" && g.fine)
-      meta.push('<div class="meta-item">' + calSvg + '&nbsp;Fine:&nbsp;<span>' + esc(g.fine) + '</span></div>');
+      meta.push('<div class="meta-item">' + calSvg + '&nbsp;<span>' + esc(g.fine) + '</span></div>');
     if (stato === "in corso" && g.inizio)
-      meta.push('<div class="meta-item">' + calSvg + '&nbsp;Dal:&nbsp;<span>' + esc(g.inizio) + '</span></div>');
+      meta.push('<div class="meta-item">' + calSvg + '&nbsp;<span>' + esc(g.inizio) + '</span></div>');
     if (g.ore && g.ore !== "0" && g.ore !== "")
       meta.push('<div class="meta-item">' + clkSvg + '&nbsp;<span>' + esc(g.ore) + 'h</span></div>');
 
-    return '<div class="card" data-s="' + esc(stato) + '" style="animation-delay:' + Math.min(i * 25, 300) + 'ms">' +
-      '<div class="card-top">' +
-        '<span class="card-title">' + esc(titolo) + '</span>' +
-        '<div class="badges">' +
-          '<span class="badge-status ' + bc + '">' + esc(label) + '</span>' +
-          (g.gamepass ? '<span class="badge-gp">Game Pass</span>' : '') +
-        '</div>' +
+    return '<div class="card" data-s="' + esc(stato) + '" data-title="' + esc(titolo) + '" style="animation-delay:' + Math.min(i*25,300) + 'ms">' +
+      '<div class="card-cover">' +
+        '<img class="cover-img" alt="" />' +
+        '<span class="cover-placeholder">🎮</span>' +
       '</div>' +
-      (piatt ? '<div class="card-platform">' + esc(piatt) + '</div>' : '') +
-      (meta.length ? '<div class="card-meta">' + meta.join("") + '</div>' : '') +
+      '<div class="card-body">' +
+        '<div class="card-top">' +
+          '<span class="card-title">' + esc(titolo) + '</span>' +
+          '<div class="badges">' +
+            '<span class="badge-status ' + bc + '">' + esc(label) + '</span>' +
+            (g.gamepass ? '<span class="badge-gp">GP</span>' : '') +
+          '</div>' +
+        '</div>' +
+        (piatt ? '<div class="card-platform">' + esc(piatt) + '</div>' : '') +
+        (meta.length ? '<div class="card-meta">' + meta.join("") + '</div>' : '') +
+      '</div>' +
     '</div>';
   }).join("");
+
+  // Carica le copertine con un piccolo ritardo scaglionato per non martellare Steam
+  var cards = grid.querySelectorAll(".card[data-title]");
+  cards.forEach(function(card, i) {
+    var titolo = card.getAttribute("data-title");
+    var imgEl  = card.querySelector(".cover-img");
+    setTimeout(function() { fetchCover(titolo, imgEl); }, i * 80);
+  });
 }
 
+// ── Helpers ──────────────────────────────────
 function showError(msg) {
   document.getElementById("grid").innerHTML =
     '<div class="state-wrap"><span class="state-icon">⚠️</span>' +
     '<p class="state-title">ERRORE DI CARICAMENTO</p>' +
     '<p class="state-sub">' + esc(msg) + '</p></div>';
 }
-
 function esc(s) {
   return String(s || "")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// Avvia
 loadData();
 </script>
 </body>
