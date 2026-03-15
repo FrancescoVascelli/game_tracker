@@ -93,7 +93,7 @@
 
     /* copertina */
     .card-cover {
-      width:100%; aspect-ratio:460/215;
+      width:100%; aspect-ratio:616/353;
       background:var(--surface2);
       display:flex; align-items:center; justify-content:center;
       overflow:hidden; position:relative;
@@ -250,10 +250,9 @@ function fetchCover(titolo, imgEl) {
       if (items && items.length > 0) {
         // Prendi il primo risultato — di solito è il più rilevante
         var appid = items[0].id;
-        // Copertina header Steam: 460×215
-        var coverUrl = "https://cdn.akamai.steamstatic.com/steam/apps/" + appid + "/header.jpg";
+        var coverUrl = "https://cdn.akamai.steamstatic.com/steam/apps/" + appid + "/capsule_616x353.jpg";
         coverCache[titolo] = coverUrl;
-        applyCover(imgEl, coverUrl);
+        applyCover(imgEl, coverUrl, "https://cdn.akamai.steamstatic.com/steam/apps/" + appid + "/header.jpg");
       } else {
         coverCache[titolo] = null;
         imgEl.parentElement.querySelector(".cover-placeholder").style.display = "block";
@@ -264,14 +263,23 @@ function fetchCover(titolo, imgEl) {
     });
 }
 
-function applyCover(imgEl, url) {
+function applyCover(imgEl, url, fallback) {
   if (!url) return;
   imgEl.src = url;
-  imgEl.onload  = function() { imgEl.classList.add("loaded"); };
+  imgEl.onload = function() { imgEl.classList.add("loaded"); };
   imgEl.onerror = function() {
-    imgEl.style.display = "none";
-    var ph = imgEl.parentElement.querySelector(".cover-placeholder");
-    if (ph) ph.style.display = "block";
+    if (fallback) {
+      imgEl.onerror = function() {
+        imgEl.style.display = "none";
+        var ph = imgEl.parentElement.querySelector(".cover-placeholder");
+        if (ph) ph.style.display = "block";
+      };
+      imgEl.src = fallback;
+    } else {
+      imgEl.style.display = "none";
+      var ph = imgEl.parentElement.querySelector(".cover-placeholder");
+      if (ph) ph.style.display = "block";
+    }
   };
 }
 
