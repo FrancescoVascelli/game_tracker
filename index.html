@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>🎮 La Mia Libreria</title>
+
+  <!-- PWA: apre a schermo intero come un'app nativa -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Giochi" />
+  <meta name="theme-color" content="#080c14" />
+  <link rel="manifest" href="manifest.json" />
+
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -149,7 +158,7 @@
 // =============================================
 // ⚠️  INCOLLA QUI L'URL DEL TUO APPS SCRIPT
 // =============================================
-var API_URL = "https://script.google.com/macros/s/AKfycbyGXbiSkgq74eWE4oBFbrCPuUozOCtOvLEHcVR-BIqKRBGVonpEMw8DPWf13spHmy9_/exec";
+var API_URL = "INCOLLA_QUI_L_URL_DELLO_SCRIPT";
 
 var allGames = [];
 var fStatus = "tutti", fPlatform = "tutte", fGP = false, fSearch = "";
